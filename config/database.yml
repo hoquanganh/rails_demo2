@@ -21,7 +21,7 @@ default: &default
   username: <%= ENV['DATABASE_USER'] || "anhho" %>
   password: <%= ENV['DATABASE_PASSWORD'] || "" %>
   port: <%= ENV['DATABASE_PORT'] || "5432" %>
-  host: <%= ENV['DATABASE_HOST'] || "localhost" %>
+  host: host.docker.internal
 
 development:
   <<: *default

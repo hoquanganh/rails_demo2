@@ -19,6 +19,7 @@ RUN apt-get update -qq && \
     git \
     libpq-dev \
     libvips \
+    postgresql-client \
     pkg-config && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
