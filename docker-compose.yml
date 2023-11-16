@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: anhne
+      POSTGRES_PASSWORD: anhne
+    volumes:
+      # Volume db_data to persist database data outside of container.
+      # When the container is deleted, the data still exists
+      - db_data:/var/lib/postgresql/data
+    ports:
+      # Map to other than default 5432 on host in case Postgres is also running natively on host.
+      - "5433:5432"
+  web:
+    build: .
+    command: bundle exec rails server -p 3000 -b '0.0.0.0'
+    volumes:
+      - .:/app
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      DATABASE_USER: anhne
+      DATABASE_PASSWORD: anhne
+      DATABASE_PORT: 5433
+
+volumes:
+  # define volumn to keep existing Data and assign it above
+  db_data:
