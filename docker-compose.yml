@@ -2,15 +2,15 @@ version: "3.8"
 
 services:
   db:
-    image: postgres:15
-    restart: always
+    image: postgres:14
     environment:
-      POSTGRES_USER: anhne
-      POSTGRES_PASSWORD: anhne
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       # Volume db_data to persist database data outside of container.
       # When the container is deleted, the data still exists
       - db_data:/var/lib/postgresql/data
+      # Host mount for one-time initialization.
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       # Map to other than default 5432 on host in case Postgres is also running natively on host.
       - "5433:5432"
@@ -24,9 +24,8 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_USER: anhne
-      DATABASE_PASSWORD: anhne
-      DATABASE_PORT: 5433
+      DATABASE_PORT: 5432
+      DATABASE_HOST: db
 
 volumes:
   # define volumn to keep existing Data and assign it above

@@ -17,10 +17,10 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: <%= ENV['DATABASE_USER'] || "anhho" %>
-  password: <%= ENV['DATABASE_PASSWORD'] || "" %>
+  username: <%= ENV['DATABASE_USER'] || "rails_demo2" %>
+  password: <%= ENV['DATABASE_PASSWORD'] || "rails_demo2" %>
   port: <%= ENV['DATABASE_PORT'] || "5432" %>
-  host: host.docker.internal
+  host: <%= ENV['DATABASE_HOST'] || "localhost" %>
 
 development:
   <<: *default
@@ -83,3 +83,5 @@ test:
 production:
   <<: *default
   database: rails_demo2_production
+  username: rails_demo2
+  password: <%= ENV['RAILS_DEMO2_DATABASE_PASSWORD'] %>
