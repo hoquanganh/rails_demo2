@@ -1,16 +1,5 @@
-# syntax = docker/dockerfile:1
-
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.2.0
-FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
-
-# Rails app lives here
-WORKDIR /app
-
-# Throw-away build stage to reduce size of final image
-FROM base as build
-
-ENV BUNDLE_PATH="/bundle"
+ARG RUBY_VERSION=3.2.0-slim
+FROM ruby:$RUBY_VERSION
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
@@ -24,25 +13,30 @@ RUN apt-get update -qq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
+# Rails app lives here
+WORKDIR /rails
+
+# Set production environment
+ENV RAILS_LOG_TO_STDOUT="1" \
+    RAILS_SERVE_STATIC_FILES="true" \
+    RAILS_ENV="production" \
+    BUNDLE_WITHOUT="development"
+
 # Install application gems
 COPY Gemfile Gemfile.lock ./
-
-# RUN bundle lock --add-platform x86_64-linux
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
+RUN bundle install
 
 # Copy application code
 COPY . .
 
 # Precompile bootsnap code for faster boot times
-RUN bundle exec bootsnap precompile app/ lib/
+RUN bundle exec bootsnap precompile --gemfile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 # Entrypoint prepares the database.
-ENTRYPOINT ["/app/bin/docker-entrypoint"]
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
